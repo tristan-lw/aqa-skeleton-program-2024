@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 
@@ -89,6 +90,35 @@ namespace Puzzle
                 AllowedSymbols.Add("T");
             }
 
+            private void ReShuffleBlockedCells()
+            {
+                List<int> blockedCellPos = new List<int>();
+                // Store and remove all current blocked cells
+                for (int i = 0; i < Grid.Count; i++)
+                {
+                    if (Grid[i].GetSymbol() == "@")
+                    {
+                        blockedCellPos.Add(i);
+                        Grid[i] = new Cell();
+                    }                
+                }
+                int num;
+                
+                for (int i = 0; i < blockedCellPos.Count;)
+                {
+                    // Find random cell
+                    num = Rng.Next(0, Grid.Count);
+                    // If it wasn't previously a blocked cell
+                    if (!blockedCellPos.Contains(num))
+                    {
+                        Grid[num] = new BlockedCell();
+                        i++;
+                    }
+                }
+
+                
+                
+            }
             private void LoadPuzzle(string Filename)
             {
                 try
@@ -182,6 +212,11 @@ namespace Puzzle
                         if (AmountToAddToScore > 0)
                         {
                             Score += AmountToAddToScore;
+                            Console.WriteLine("Reshuffle all blocked cells?");
+                            if (Console.ReadLine() == "y")
+                            {
+                                ReShuffleBlockedCells();
+                            }
                         }
                     }
                     if (SymbolsLeft == 0)
@@ -199,7 +234,7 @@ namespace Puzzle
             {
                 return Grid[(GridSize - Row) * GridSize + Column - 1];
             }
-
+            
             public virtual int CheckForMatchWithPattern(int Row, int Column)
             {
                 for (var StartRow = Row + 2; StartRow >= Row; StartRow--)
